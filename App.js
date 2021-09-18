@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components/native';
 import { Dimensions, LogBox } from 'react-native';
 import { NativeBaseProvider, Input, Text, Stack, FormControl, Heading, Collapse, Button, Center } from 'native-base';
 import InputControl from './src/components/InputControl';
-import CollapseControl from './src/view/Collapse';
+import TaskView from './src/view/TaskView';
+
 LogBox.ignoreAllLogs();
 const Page = styled.SafeAreaView`
   flex: 1;
@@ -115,7 +116,7 @@ export default () => {
             </Stack>
           </BoxT>
           <CollapseComponent/>
-          <CollapseControl />
+          <TaskView />
         </NativeBaseProvider>
       </Scroll>
     </Page>
