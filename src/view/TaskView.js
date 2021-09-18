@@ -5,6 +5,8 @@ import ListaItem from '../components/ListIems';
 import lista from '../lists/task';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-native-get-random-values';
+import { SwipeListView } from 'react-native-swipe-list-view';
+import ListaItemSwipe from '../components/ListaItemSwipe';
 
 const Page = styled.SafeAreaView`
   flex: 1;
@@ -47,12 +49,21 @@ export default () => {
     setTaskFalse(items.filter(item => item.done == false).length);
   }, [items]);
 
+  const deleteItem = (index) => {
+    let newItems = [...items];
+    newItems.splice(index, 1);
+    setItems(newItems);
+  }
+
   return (
     <Page>
       <AddItemArea onAdd={addNewItem} />
-      <Listagem
+      <SwipeListView
         data={items}
         renderItem={({ item, index }) => <ListaItem onPress={() => toggleDone(index)} data={item} />}
+        leftOpenValue={50}
+        disableLeftSwipe={true}
+        renderHiddenItem={({item, index}) => <ListaItemSwipe onDelete={()=>deleteItem(index)}/>}
       />
      <Text>Tarefas Realizas: {taskTrue} / Tarefas não Realizadas: {taskFalse}</Text>
     </Page>

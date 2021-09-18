@@ -4,6 +4,7 @@ import { Dimensions, LogBox } from 'react-native';
 import { NativeBaseProvider, Input, Text, Stack, FormControl, Heading, Collapse, Button, Center } from 'native-base';
 import InputControl from './src/components/InputControl';
 import TaskView from './src/view/TaskView';
+import AsyncStorage from '@react-native-community/async-storage';
 
 LogBox.ignoreAllLogs();
 const Page = styled.SafeAreaView`
@@ -44,7 +45,7 @@ const BoxT = styled.View`
 `;
 
 export default () => {
-  
+
   const [nameStudent, setNameStudent] = useState('');
   const [nameCourse, setNameCourse] = useState('');
   const [nameSubject, setNameSubject] = useState('');
@@ -54,25 +55,37 @@ export default () => {
   const [meeting, setMeeting] = useState('0');
   const [average, setAverage] = useState('0');
   const [status, setStatus] = useState('Reprovado');
-
+  const [initState, setInitState] = useState(true);
+  const [show, setShow] = useState(false);
 
   function CollapseComponent() {
-    const [show, setShow] = React.useState(false);
-    let faltasPorcento = (((parseInt(absences)*100)/parseInt(meeting)) > '25' ? true : false);
-    console.log(((parseInt(absences)*100)/parseInt(meeting)))
+    let faltasPorcento = (((parseInt(absences) * 100) / parseInt(meeting)) > '25' ? true : false);
     let media = 0;
     if (noteOne != 0 || noteTwo != 0) {
       media = (parseFloat(noteOne) + parseFloat(noteTwo)) / 2;
       if (media >= 7.0 && faltasPorcento == false) {
-        console.log(faltasPorcento)
-        setStatus('Aprovado');
+        setStatus('Aprovado')
       } else setStatus('Reprovado');
       setAverage(media);
     } else {
       setAverage('0');
     }
 
-    const handleToggle = () => setShow(!show);
+    const handleToggle = async () => {
+      setShow(!show);
+      if (nameStudent != '' && nameCourse != '' && nameSubject != '') {
+        AsyncStorage.setItem('@show', String(show));
+        AsyncStorage.setItem('@status', status);
+        AsyncStorage.setItem('@average', String(average));
+        AsyncStorage.setItem('@absences', String(absences));
+        AsyncStorage.setItem('@meeting', String(meeting));
+        AsyncStorage.setItem('@noteOne', String(noteOne));
+        AsyncStorage.setItem('@noteTwo', String(noteTwo));
+        AsyncStorage.setItem('@nameStudent', nameStudent);
+        AsyncStorage.setItem('@nameCourse', nameCourse);
+        AsyncStorage.setItem('@nameSubject', nameSubject);
+      }
+    }
 
     return (
       <Stack space={4} mx={8} mb={2} mt={2}>
@@ -92,6 +105,35 @@ export default () => {
       </Stack>
     );
   }
+
+  const getData = async () => {
+    const show = await AsyncStorage.getItem('@show');
+    const status = await AsyncStorage.getItem('@status');
+    const average = await AsyncStorage.getItem('@average');
+    const absences = await AsyncStorage.getItem('@absences');
+    const meeting = await AsyncStorage.getItem('@meeting');
+    const noteOne = await AsyncStorage.getItem('@noteOne');
+    const noteTwo = await AsyncStorage.getItem('@noteTwo');
+    const nameStudent = await AsyncStorage.getItem('@nameStudent');
+    const nameCourse = await AsyncStorage.getItem('@nameCourse');
+    const nameSubject = await AsyncStorage.getItem('@nameSubject');
+    console.log(nameStudent)
+    setShow(show);
+    setStatus(status);
+    setAverage(average);
+    setAbsences(absences);
+    setMeeting(meeting);
+    setNoteOne(noteOne);
+    setNoteTwo(noteTwo);
+    setNameStudent(nameStudent);
+    setNameCourse(nameCourse);
+    setNameSubject(nameSubject);
+  }
+
+  useEffect(() => {
+    console.log('useEffect entrou')
+    getData();
+  }, []);
 
   return (
     <Page>
@@ -115,7 +157,7 @@ export default () => {
               <InputControl nameLabel="Total de Encontros: " nameInputPlaceHolder="0" value={meeting} onChangeText={t => setMeeting(t)} keyboardType="numeric" />
             </Stack>
           </BoxT>
-          <CollapseComponent/>
+          <CollapseComponent />
           <TaskView />
         </NativeBaseProvider>
       </Scroll>
